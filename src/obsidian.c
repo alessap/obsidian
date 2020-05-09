@@ -258,6 +258,101 @@ void subscribe_tick(bool also_unsubscribe) {
     tick_timer_service_subscribe(unit, handle_second_tick);
 }
 
+
+//  /////////////////////////////////////////////////////////////////////////////
+//  /////////////////////////////// Health  from AnalogFit //////////////////////
+//  /////////////////////////////////////////////////////////////////////////////
+//  static void health_handler(HealthEventType event, void *context) {
+//    static char s_value_buffer[8];
+//    if (event == HealthEventMovementUpdate) {
+//      // display the step count
+//      snprintf(s_value_buffer, sizeof(s_value_buffer), "%d", (int)health_service_sum_today(HealthMetricStepCount));
+//      text_layer_set_text(s_num_label, s_value_buffer);
+//  						
+//  		//Vibrate only once on steps goal reach
+//  		if( atoi(settings.StepsGoal) > 0 &&
+//  			 ((int)health_service_sum_today(HealthMetricStepCount) >= atoi(settings.StepsGoal)) && 
+//  			 stepsGoalReached == false) {
+//  			// Vibe pattern: ON for 200ms, OFF for 100ms, ON for 400ms:
+//  			static const uint32_t segments[] = { 200, 100, 100, 50, 100, 50, 700};
+//  			VibePattern pat = {
+//    			.durations = segments,
+//    			.num_segments = ARRAY_LENGTH(segments),
+//  			};
+//  			vibes_enqueue_custom_pattern(pat);
+//  			stepsGoalReached = true;
+//  		}
+//    }
+//  	
+//  	#if PBL_API_EXISTS(health_service_peek_current_value)
+//      /** Display the Heart Rate **/
+//      HealthValue value = health_service_peek_current_value(HealthMetricHeartRateBPM);
+//      static char s_hrm_buffer[8];
+//      snprintf(s_hrm_buffer, sizeof(s_hrm_buffer), "%lu", (uint32_t) value);
+//      text_layer_set_text(s_bpm_label, s_hrm_buffer);
+//      layer_set_hidden(text_layer_get_layer(s_bpm_label), false);
+//    #else
+//      layer_set_hidden(text_layer_get_layer(s_bpm_label), true);
+//    #endif
+//  }
+
+
+// Add heart bitmap layer
+// static uint32_t imageBackground, imageSteps, imageHrm, imageWatchBattery, imagePhoneBattery;
+static uint32_t heart_image_id;
+static GBitmap *heart_bitmap;
+static BitmapLayer *heart_image_layer;
+static TextLayer *heart_bpm_layer;
+
+static void draw_heart(Window *window) {
+    heart_image_id = RESOURCE_ID_IMAGE_HEART_BLACK;
+   	heart_bitmap = gbitmap_create_with_resource(heart_image_id);
+    heart_image_layer = bitmap_layer_create(GRect(127, 142, 10, 10));
+    bitmap_layer_set_bitmap(heart_image_layer, heart_bitmap);
+    
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(heart_image_layer));
+    
+    // fetch heart rate bpm and write on layer
+    static char heart_bpm_buffer[8];
+    snprintf(heart_bpm_buffer, sizeof(heart_bpm_buffer), "%d", (int)health_service_peek_current_value(HealthMetricHeartRateBPM));
+    heart_bpm_layer = text_layer_create(GRect(70, 135, 53, 200));
+    text_layer_set_background_color(heart_bpm_layer, GColorClear);
+    text_layer_set_text_color(heart_bpm_layer, GColorBlack);
+    text_layer_set_text(heart_bpm_layer, heart_bpm_buffer);
+    text_layer_set_font(heart_bpm_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(heart_bpm_layer, GTextAlignmentRight);
+
+  	layer_add_child(window_get_root_layer(window), text_layer_get_layer(heart_bpm_layer));
+}
+
+static uint32_t step_image_id;
+static GBitmap *step_bitmap;
+static BitmapLayer *step_image_layer;
+static TextLayer *step_num_layer;
+
+static void draw_step(Window *window) {
+    // draw shoe
+    step_image_id = RESOURCE_ID_IMAGE_SHOE_BLACK;
+   	step_bitmap = gbitmap_create_with_resource(step_image_id);
+    step_image_layer = bitmap_layer_create(GRect(7, 140, 15, 14));
+    bitmap_layer_set_bitmap(step_image_layer, step_bitmap);
+    
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(step_image_layer));
+    
+    // fetch steps number and write on layer
+    static char step_num_buffer[8];
+    snprintf(step_num_buffer, sizeof(step_num_buffer), "%d", (int)health_service_sum_today(HealthMetricStepCount));
+    step_num_layer = text_layer_create(GRect(23, 135, 62, 20));
+    text_layer_set_background_color(step_num_layer, GColorClear);
+    text_layer_set_text_color(step_num_layer, GColorBlack);
+    text_layer_set_text(step_num_layer, step_num_buffer);
+    text_layer_set_font(step_num_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(step_num_layer, GTextAlignmentLeft);
+  	
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(step_num_layer));
+}
+
+
 /**
  * Initialization.
  */
@@ -378,7 +473,6 @@ void init() {
 #ifdef DEBUG_NO_BATTERY_ICON
     config_battery_logo = 3;
 #endif
-
     window = window_create();
     window_set_window_handlers(window, (WindowHandlers) {
             .load = window_load,
@@ -391,6 +485,8 @@ void init() {
 
     app_message_open(OBSIDIAN_INBOX_SIZE, OBSIDIAN_OUTBOX_SIZE);
     app_message_register_inbox_received(inbox_received_handler);
+    draw_heart(window);
+    draw_step(window);
 }
 
 /**
