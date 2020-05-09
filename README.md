@@ -2,6 +2,8 @@
 
 ![Obsidian banner](resources/images/banner.png)
 
+**Disclaimer**: This is a fork of [obsidian](https://github.com/stefanheule/obsidian) where I added steps and heart BPM with inspiration from [ivanmihov's code](https://github.com/ivanmihov/pebble-analogfit). Thank you both for making your code publicly available. The watchface has been built and tested ONLY for Pebble 2+HR (diorite).
+
 Available in the Pebble App Store:
 
 [![Available on the Pebble App Store](http://pblweb.com/badge/55ee57da2b0b31132c00008b/black/small)](https://apps.getpebble.com/applications/55ee57da2b0b31132c00008b)
