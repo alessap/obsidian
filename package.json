@@ -1,6 +1,6 @@
 {
   "version": "3.6.0",
-  "author": "Stefan Heule",
+  "author": "Stefan Heule & alessap",
   "private": true,
   "keywords": [
     "pebble-app"
@@ -20,7 +20,9 @@
           "name": "MAIN_FFONT",
           "file": "OpenSans-CondensedBold.ffont",
           "targetPlatforms": [
-            "basalt", "chalk", "emery"
+            "basalt",
+            "chalk",
+            "emery"
           ]
         },
         {
@@ -28,17 +30,30 @@
           "name": "WEATHER_FFONT",
           "file": "nupe2.ffont",
           "targetPlatforms": [
-            "basalt", "chalk", "emery"
+            "basalt",
+            "chalk",
+            "emery"
           ]
         },
         {
-        "characterRegex": "[a-jzA-IZ]",
-        "file": "fonts/nupe2.ttf",
-        "name": "NUPE_23",
-        "type": "font",
-        "targetPlatforms": [
-          "aplite", "diorite"
-        ]
+          "characterRegex": "[a-jzA-IZ]",
+          "file": "fonts/nupe2.ttf",
+          "name": "NUPE_23",
+          "type": "font",
+          "targetPlatforms": [
+            "aplite",
+            "diorite"
+          ]
+        },
+        {
+          "file": "images/layers/heart_black.png",
+          "name": "IMAGE_HEART_BLACK",
+          "type": "bitmap"
+        },
+        {
+          "file": "images/layers/shoe_black.png",
+          "name": "IMAGE_SHOE_BLACK",
+          "type": "bitmap"
         }
       ]
     },
@@ -92,24 +107,20 @@
       "MSG_KEY_WEATHER_FAILED": 104
     },
     "enableMultiJS": false,
-    "displayName": "Obsidian",
+    "displayName": "Obsidian_2",
     "watchapp": {
       "onlyShownOnCommunication": false,
       "hiddenApp": false,
       "watchface": true
     },
     "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "chalk",
-      "diorite",
-      "emery"
+      "diorite"
     ],
     "capabilities": [
       "configurable"
     ]
   },
-  "name": "Obsidian",
+  "name": "Obsidian_2",
   "devDependencies": {
     "pebble-fctx-compiler": "^1.2.1"
   },
