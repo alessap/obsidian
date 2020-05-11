@@ -554,7 +554,7 @@ var ObsidianPreview = (function () {
             CONFIG_WEATHER_LOCATION_LOCAL: "",
             CONFIG_WEATHER_REFRESH: 30,
             CONFIG_WEATHER_EXPIRATION: 3 * 60,
-            CONFIG_SQUARE: +false,
+            CONFIG_SQUARE: +true,
             CONFIG_SECONDS: 0,
             CONFIG_COLOR_SECONDS: COLOR_FALLBACK(GColor.JaegerGreen, GColor.Black),
             CONFIG_DATE_FORMAT: 0

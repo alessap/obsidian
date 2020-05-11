@@ -58,7 +58,7 @@ uint8_t config_hour_ticks = 1;
 uint8_t config_color_weather = COLOR_FALLBACK(GColorBlackARGB8, GColorBlackARGB8);
 uint16_t config_weather_refresh = 30;
 uint16_t config_weather_expiration = 3*60;
-uint8_t config_square = false;
+uint8_t config_square = true;
 uint8_t config_seconds = 0;
 uint8_t config_color_seconds = COLOR_FALLBACK(GColorJaegerGreenARGB8, GColorBlackARGB8);
 uint8_t config_date_format = 0;
@@ -202,6 +202,78 @@ void handle_bluetooth(bool connected) {
     }
 }
 
+// Add heart bitmap layer
+// static uint32_t imageBackground, imageSteps, imageHrm, imageWatchBattery, imagePhoneBattery;
+static uint32_t heart_image_id;
+static GBitmap *heart_bitmap;
+static BitmapLayer *heart_image_layer;
+static TextLayer *heart_bpm_layer;
+
+// static bool more_heart_rate_samples;
+// more_heart_rate_samples = health_service_set_heart_rate_sample_period(1);
+
+// static uint32_t heart_rate_sample;
+// heart_rate_sample = 1;
+// health_service_set_heart_rate_sample_period(heart_rate_sample);
+// health_service_set_heart_rate_sample_period(heart_rate_sample);
+
+
+static void draw_heart(Window *window) {
+    heart_image_id = RESOURCE_ID_IMAGE_HEART_BLACK;
+   	heart_bitmap = gbitmap_create_with_resource(heart_image_id);
+    heart_image_layer = bitmap_layer_create(GRect(127, 142, 10, 10));
+    bitmap_layer_set_bitmap(heart_image_layer, heart_bitmap);
+    
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(heart_image_layer));
+    
+    // fetch heart rate bpm and write on layer
+    static char heart_bpm_buffer[8];
+    //snprintf(heart_bpm_buffer, sizeof(heart_bpm_buffer), "%d", (int)health_service_peek_current_value(HealthMetricRestingHeartRateBPM));
+    // snprintf(heart_bpm_buffer, sizeof(heart_bpm_buffer), "%d", (int)health_service_peek_current_value(HealthMetricHeartRateRawBPM));
+    snprintf(heart_bpm_buffer, sizeof(heart_bpm_buffer), "%d", (int)health_service_peek_current_value(HealthMetricHeartRateBPM));
+    heart_bpm_layer = text_layer_create(GRect(70, 135, 53, 200));
+    text_layer_set_background_color(heart_bpm_layer, GColorClear);
+    text_layer_set_text_color(heart_bpm_layer, GColorBlack);
+    text_layer_set_text(heart_bpm_layer, heart_bpm_buffer);
+    text_layer_set_font(heart_bpm_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(heart_bpm_layer, GTextAlignmentRight);
+
+  	layer_add_child(window_get_root_layer(window), text_layer_get_layer(heart_bpm_layer));
+}
+
+static uint32_t step_image_id;
+static GBitmap *step_bitmap;
+static BitmapLayer *step_image_layer;
+static TextLayer *step_num_layer;
+
+static void draw_step(Window *window) {
+    // draw shoe
+    step_image_id = RESOURCE_ID_IMAGE_SHOE_BLACK;
+   	step_bitmap = gbitmap_create_with_resource(step_image_id);
+    step_image_layer = bitmap_layer_create(GRect(7, 140, 15, 14));
+    bitmap_layer_set_bitmap(step_image_layer, step_bitmap);
+    
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(step_image_layer));
+    
+    // fetch steps number and write on layer
+    static char step_num_buffer[8];
+    snprintf(step_num_buffer, sizeof(step_num_buffer), "%d", (int)health_service_sum_today(HealthMetricStepCount));
+    step_num_layer = text_layer_create(GRect(23, 135, 62, 20));
+    text_layer_set_background_color(step_num_layer, GColorClear);
+    text_layer_set_text_color(step_num_layer, GColorBlack);
+    text_layer_set_text(step_num_layer, step_num_buffer);
+    text_layer_set_font(step_num_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(step_num_layer, GTextAlignmentLeft);
+  	
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(step_num_layer));
+}
+static void health_handler(HealthEventType event, void *context) {
+    if (event == HealthEventMovementUpdate) {
+        draw_step(window);
+        draw_heart(window);
+    }
+}
+
 /**
  * Window load callback.
  */
@@ -213,7 +285,15 @@ void window_load(Window *window) {
     layer_background = layer_create(bounds);
     layer_set_update_proc(layer_background, background_update_proc);
     layer_add_child(window_layer, layer_background);
-
+    
+    // in window_load subscribe to health events
+    if(health_service_events_subscribe(health_handler, NULL)) {
+        // force initial steps display
+        health_handler(HealthEventMovementUpdate, NULL);
+    } else {
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
+    }
+    
     // load fonts
 #ifdef PBL_COLOR
     font_main = ffont_create_from_resource(RESOURCE_ID_MAIN_FFONT);
@@ -297,62 +377,29 @@ void subscribe_tick(bool also_unsubscribe) {
 //  }
 
 
-// Add heart bitmap layer
-// static uint32_t imageBackground, imageSteps, imageHrm, imageWatchBattery, imagePhoneBattery;
-static uint32_t heart_image_id;
-static GBitmap *heart_bitmap;
-static BitmapLayer *heart_image_layer;
-static TextLayer *heart_bpm_layer;
-
-static void draw_heart(Window *window) {
-    heart_image_id = RESOURCE_ID_IMAGE_HEART_BLACK;
-   	heart_bitmap = gbitmap_create_with_resource(heart_image_id);
-    heart_image_layer = bitmap_layer_create(GRect(127, 142, 10, 10));
-    bitmap_layer_set_bitmap(heart_image_layer, heart_bitmap);
-    
-    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(heart_image_layer));
-    
-    // fetch heart rate bpm and write on layer
-    static char heart_bpm_buffer[8];
-    snprintf(heart_bpm_buffer, sizeof(heart_bpm_buffer), "%d", (int)health_service_peek_current_value(HealthMetricHeartRateBPM));
-    heart_bpm_layer = text_layer_create(GRect(70, 135, 53, 200));
-    text_layer_set_background_color(heart_bpm_layer, GColorClear);
-    text_layer_set_text_color(heart_bpm_layer, GColorBlack);
-    text_layer_set_text(heart_bpm_layer, heart_bpm_buffer);
-    text_layer_set_font(heart_bpm_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	text_layer_set_text_alignment(heart_bpm_layer, GTextAlignmentRight);
-
-  	layer_add_child(window_get_root_layer(window), text_layer_get_layer(heart_bpm_layer));
-}
-
-static uint32_t step_image_id;
-static GBitmap *step_bitmap;
-static BitmapLayer *step_image_layer;
-static TextLayer *step_num_layer;
-
-static void draw_step(Window *window) {
-    // draw shoe
-    step_image_id = RESOURCE_ID_IMAGE_SHOE_BLACK;
-   	step_bitmap = gbitmap_create_with_resource(step_image_id);
-    step_image_layer = bitmap_layer_create(GRect(7, 140, 15, 14));
-    bitmap_layer_set_bitmap(step_image_layer, step_bitmap);
-    
-    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(step_image_layer));
-    
-    // fetch steps number and write on layer
-    static char step_num_buffer[8];
-    snprintf(step_num_buffer, sizeof(step_num_buffer), "%d", (int)health_service_sum_today(HealthMetricStepCount));
-    step_num_layer = text_layer_create(GRect(23, 135, 62, 20));
-    text_layer_set_background_color(step_num_layer, GColorClear);
-    text_layer_set_text_color(step_num_layer, GColorBlack);
-    text_layer_set_text(step_num_layer, step_num_buffer);
-    text_layer_set_font(step_num_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	text_layer_set_text_alignment(step_num_layer, GTextAlignmentLeft);
-  	
-    layer_add_child(window_get_root_layer(window), text_layer_get_layer(step_num_layer));
-}
-
-
+//  
+// void subscribe_health(bool also_unsubscribe) {
+//     if (also_unsubscribe) {
+//         tick_timer_service_unsubscribe();
+//     }
+//     TimeUnits unit = MINUTE_UNIT;
+//     if (config_seconds != 0) {
+//       unit = SECOND_UNIT;
+//     }
+// #ifdef DEBUG_ITER_COUNTER
+//     unit = SECOND_UNIT;
+// #endif
+//     tick_timer_service_subscribe(unit, handle_second_tick);
+// }
+// 
+// // in window_load subscribe to health events
+// if(health_service_events_subscribe(health_handler, NULL)) {
+//     // force initial steps display
+//     health_handler(HealthEventMovementUpdate, NULL);
+// } else {
+//     APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
+// }
+// 
 /**
  * Initialization.
  */
@@ -478,15 +525,16 @@ void init() {
             .load = window_load,
             .unload = window_unload,
     });
+    draw_heart(window);
+    draw_step(window);
     window_stack_push(window, true);
-
+    
+    
     subscribe_tick(false);
     bluetooth_connection_service_subscribe(handle_bluetooth);
 
     app_message_open(OBSIDIAN_INBOX_SIZE, OBSIDIAN_OUTBOX_SIZE);
-    app_message_register_inbox_received(inbox_received_handler);
-    draw_heart(window);
-    draw_step(window);
+    app_message_register_inbox_received(inbox_received_handler);    
 }
 
 /**
