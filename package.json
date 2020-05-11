@@ -1,6 +1,6 @@
 {
-  "version": "3.6.0",
-  "author": "Stefan Heule & alessap",
+  "version": "3.7.0",
+  "author": "Stefan Heule & Alessandro Pirrotta",
   "private": true,
   "keywords": [
     "pebble-app"
@@ -44,6 +44,12 @@
             "aplite",
             "diorite"
           ]
+        },
+        {
+            "file": "images/watch_icon_black.png",
+            "name": "IMAGE_WATCH_BLACK",
+            "targetPlatforms": null,
+            "type": "bitmap"
         },
         {
           "file": "images/layers/heart_black.png",
@@ -107,7 +113,7 @@
       "MSG_KEY_WEATHER_FAILED": 104
     },
     "enableMultiJS": false,
-    "displayName": "Obsidian_2",
+    "displayName": "ObsidianPlus",
     "watchapp": {
       "onlyShownOnCommunication": false,
       "hiddenApp": false,
@@ -117,10 +123,11 @@
       "diorite"
     ],
     "capabilities": [
-      "configurable"
+      "configurable",
+      "health"
     ]
   },
-  "name": "Obsidian_2",
+  "name": "ObsidianPlus",
   "devDependencies": {
     "pebble-fctx-compiler": "^1.2.1"
   },
