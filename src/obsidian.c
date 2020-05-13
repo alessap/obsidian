@@ -267,6 +267,34 @@ static void draw_step(Window *window) {
   	
     layer_add_child(window_get_root_layer(window), text_layer_get_layer(step_num_layer));
 }
+
+static uint32_t phone_image_id;
+static GBitmap *phone_bitmap;
+static BitmapLayer *phone_image_layer;
+// static TextLayer *phone_num_layer;
+
+static void draw_phone(Window *window) {
+    // draw phone
+    phone_image_id = RESOURCE_ID_IMAGE_PHONE_BLACK;
+   	phone_bitmap = gbitmap_create_with_resource(phone_image_id);
+    phone_image_layer = bitmap_layer_create(GRect(7, 11, 10, 20));
+    bitmap_layer_set_bitmap(phone_image_layer, phone_bitmap);
+    
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(phone_image_layer));
+    
+//    // fetch steps number and write on layer
+//    static char step_num_buffer[8];
+//    snprintf(step_num_buffer, sizeof(step_num_buffer), "%d", (int)health_service_sum_today(HealthMetricStepCount));
+//    step_num_layer = text_layer_create(GRect(23, 135, 62, 20));
+//    text_layer_set_background_color(step_num_layer, GColorClear);
+//    text_layer_set_text_color(step_num_layer, GColorBlack);
+//    text_layer_set_text(step_num_layer, step_num_buffer);
+//    text_layer_set_font(step_num_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+//    text_layer_set_text_alignment(step_num_layer, GTextAlignmentLeft);
+//  	
+//    layer_add_child(window_get_root_layer(window), text_layer_get_layer(step_num_layer));
+}
+
 static void health_handler(HealthEventType event, void *context) {
     if (event == HealthEventMovementUpdate) {
         draw_step(window);
@@ -274,6 +302,11 @@ static void health_handler(HealthEventType event, void *context) {
     }
 }
 
+static void battery_handler(HealthEventType event, void *context) {
+    if (event == HealthEventMovementUpdate) {
+        draw_phone(window);
+    }
+}
 /**
  * Window load callback.
  */
@@ -293,6 +326,7 @@ void window_load(Window *window) {
     } else {
         APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
     }
+    draw_phone(window);
     
     // load fonts
 #ifdef PBL_COLOR

@@ -46,10 +46,16 @@
           ]
         },
         {
-            "file": "images/watch_icon_black.png",
-            "name": "IMAGE_WATCH_BLACK",
-            "targetPlatforms": null,
-            "type": "bitmap"
+          "file": "images/layers/phone_icon_black.png",
+          "name": "IMAGE_PHONE_BLACK",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/layers/watch_icon_black.png",
+          "name": "IMAGE_WATCH_BLACK",
+          "targetPlatforms": null,
+          "type": "bitmap"
         },
         {
           "file": "images/layers/heart_black.png",
